@@ -3,6 +3,7 @@ import time
 import sys
 
 from pyquery import PyQuery as pq
+import requests
 from twilio.rest import TwilioRestClient
 
 client = TwilioRestClient(os.environ['TWILIO_ACCOUNT_SID'],
@@ -22,7 +23,13 @@ def main():
     try:
         found = []
         while True:
-            doc = pq(url=SPEAKER_URL)
+            try:
+                doc = pq(url=SPEAKER_URL)
+            except requests.exceptions.ConnectionError:
+                print "Error connecting to the state website, sleeping..."
+                time.sleep(60)
+                continue
+
             new_speaker_names = [a.text for a in
                     doc.find('#content blockquote h3')]
 
